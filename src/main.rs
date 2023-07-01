@@ -2,11 +2,13 @@ use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyEventSta
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use math::round;
 use rodio::{source::Source, OutputStream};
-use square_wave_oscilator::SquareWaveOscilator;
+use saw_wave_oscilator::SawWaveOscilator;
+use saw_wave_oscilator_band_limited::SawWaveOscilatorBandLimited;
 use wave_table_oscilator::WavetableOscillator;
 
 use std::sync::mpsc::{self};
-mod square_wave_oscilator;
+mod saw_wave_oscilator;
+mod saw_wave_oscilator_band_limited;
 mod wave_table_oscilator;
 ///    Calculate the frequency of any note!
 /// frequency = 440×(2^(n/12))
@@ -47,7 +49,7 @@ fn main() {
     let (tx, rx) = mpsc::channel();
 
     //let oscillator = WavetableOscillator::new(44100, wave_table, rx);
-    let oscillator = SquareWaveOscilator::new(44100, rx);
+    let oscillator = SawWaveOscilatorBandLimited::new(44100, rx);
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 

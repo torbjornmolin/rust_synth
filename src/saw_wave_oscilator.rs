@@ -3,7 +3,7 @@ use std::{sync::mpsc::Receiver, time::Duration};
 use num::clamp;
 use rodio::Source;
 
-pub struct SquareWaveOscilator {
+pub struct SawWaveOscilator {
     sample_rate: u32,
     receiver: Receiver<f32>,
     amplitude: f32,
@@ -11,9 +11,9 @@ pub struct SquareWaveOscilator {
     phase: f32,
 }
 
-impl SquareWaveOscilator {
-    pub fn new(sample_rate: u32, receiver: Receiver<f32>) -> SquareWaveOscilator {
-        return SquareWaveOscilator {
+impl SawWaveOscilator {
+    pub fn new(sample_rate: u32, receiver: Receiver<f32>) -> SawWaveOscilator {
+        return SawWaveOscilator {
             sample_rate,
             receiver,
             amplitude: 0.0,
@@ -52,7 +52,7 @@ impl SquareWaveOscilator {
     }
 }
 
-impl Source for SquareWaveOscilator {
+impl Source for SawWaveOscilator {
     fn channels(&self) -> u16 {
         return 1;
     }
@@ -70,7 +70,7 @@ impl Source for SquareWaveOscilator {
     }
 }
 
-impl Iterator for SquareWaveOscilator {
+impl Iterator for SawWaveOscilator {
     type Item = f32;
 
     fn next(&mut self) -> Option<Self::Item> {
