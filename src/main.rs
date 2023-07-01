@@ -60,6 +60,7 @@ fn main() {
 
 fn listen_for_keyboard(tx: mpsc::Sender<f32>) {
     enable_raw_mode().unwrap();
+    let mut current_octave = 1.0;
     loop {
         match read().unwrap() {
             Event::Key(KeyEvent {
@@ -74,10 +75,16 @@ fn listen_for_keyboard(tx: mpsc::Sender<f32>) {
                 kind: KeyEventKind::Press,
                 state: KeyEventState::NONE,
             }) => {
-                let f = frequency_from_keycode(c);
-                match f {
-                    Some(f) => tx.send(f).unwrap(),
-                    None => (),
+                if c == KeyCode::Char('9') {
+                    current_octave += 1.0;
+                } else if c == KeyCode::Char('8') {
+                    current_octave -= 1.0;
+                } else {
+                    let f = frequency_from_keycode(c, current_octave);
+                    match f {
+                        Some(f) => tx.send(f).unwrap(),
+                        None => (),
+                    }
                 }
             }
 
@@ -87,8 +94,7 @@ fn listen_for_keyboard(tx: mpsc::Sender<f32>) {
     disable_raw_mode().unwrap();
 }
 
-fn frequency_from_keycode(c: KeyCode) -> Option<f32> {
-    let octave = 1.0;
+fn frequency_from_keycode(c: KeyCode, octave: f32) -> Option<f32> {
     match c {
         KeyCode::Char('a') => Some(calc_frequency(octave, 3.0)), // C
         KeyCode::Char('w') => Some(calc_frequency(octave, 4.0)), // C#
