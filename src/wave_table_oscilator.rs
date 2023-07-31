@@ -1,6 +1,7 @@
 use ::num::clamp;
 use rodio::Source;
-use std::{sync::mpsc::Receiver, time::Duration};
+use spmc::Receiver;
+use std::time::Duration;
 pub struct WavetableOscillator {
     sample_rate: u32,
     wave_table: Vec<f32>,

@@ -1,7 +1,7 @@
-use std::{sync::mpsc::Receiver, time::Duration};
-
 use num::clamp;
 use rodio::Source;
+use spmc::Receiver;
+use std::time::Duration;
 
 pub struct SawWaveOscilatorBandLimited {
     sample_rate: u32,
