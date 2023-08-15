@@ -1,43 +1,37 @@
+use std::sync::mpsc;
+
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use envvelope::Envelope;
 use math::round;
 use musical_keyboard::frequency_from_keycode;
 use rodio::{source::Source, OutputStream};
 use saw_wave_oscilator::SawWaveOscilator;
 use saw_wave_oscilator_band_limited::SawWaveOscilatorBandLimited;
-use spmc;
 use wave_table_oscilator::WavetableOscillator;
 
+pub mod envvelope;
 mod musical_keyboard;
 mod saw_wave_oscilator;
 mod saw_wave_oscilator_band_limited;
 mod wave_table_oscilator;
 
 fn main() {
-    let wave_table_size = 64;
-    let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
-
-    for n in 0..wave_table_size {
-        let sample: f32 = (2.0
-            * (2.0 * round::floor(n as f64 / wave_table_size as f64, 0)
-                - round::floor(2.0 * n as f64 / wave_table_size as f64, 0))
-            + 1.0) as f32;
-        wave_table.push(sample);
-    }
-
-    let (mut tx, rx) = spmc::channel();
+    let (tx, rx) = mpsc::channel();
 
     //let oscillator = WavetableOscillator::new(44100, wave_table, rx);
     let oscillator = SawWaveOscilatorBandLimited::new(44100, rx);
 
+    let envelope = Envelope::new::<SawWaveOscilatorBandLimited>(oscillator);
+
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let _result = stream_handle.play_raw(oscillator.convert_samples());
+    let _result = stream_handle.play_raw(envelope.convert_samples());
 
     listen_for_keyboard(tx);
 }
 
-fn listen_for_keyboard(mut tx: spmc::Sender<f32>) {
+fn listen_for_keyboard(mut tx: mpsc::Sender<f32>) {
     enable_raw_mode().unwrap();
     let mut current_octave = 1.0;
     loop {

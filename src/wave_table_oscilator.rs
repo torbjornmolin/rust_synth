@@ -1,7 +1,8 @@
 use ::num::clamp;
+use math::round;
+use num::complex::ComplexFloat;
 use rodio::Source;
-use spmc::Receiver;
-use std::time::Duration;
+use std::{sync::mpsc::Receiver, time::Duration};
 pub struct WavetableOscillator {
     sample_rate: u32,
     wave_table: Vec<f32>,
@@ -13,6 +14,20 @@ pub struct WavetableOscillator {
 }
 
 impl WavetableOscillator {
+    pub fn new_sinwave(sample_rate: u32, receiver: Receiver<f32>) -> WavetableOscillator {
+        let wave_table_size = 64;
+        let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
+
+        for n in 0..wave_table_size {
+            let sample: f32 = (2.0
+                * (2.0 * round::floor(n as f64 / wave_table_size as f64, 0)
+                    - round::floor(2.0 * n as f64 / wave_table_size as f64, 0))
+                + 1.0) as f32;
+            wave_table.push(sample);
+        }
+
+        Self::new(sample_rate, wave_table, receiver)
+    }
     pub fn new(
         sample_rate: u32,
         wave_table: Vec<f32>,

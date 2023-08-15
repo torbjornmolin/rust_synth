@@ -1,5 +1,4 @@
-use spmc::Receiver;
-use std::time::Duration;
+use std::{sync::mpsc::Receiver, time::Duration};
 
 use num::clamp;
 use rodio::Source;

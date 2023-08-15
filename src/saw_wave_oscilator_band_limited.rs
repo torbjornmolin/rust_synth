@@ -1,7 +1,6 @@
 use num::clamp;
 use rodio::Source;
-use spmc::Receiver;
-use std::time::Duration;
+use std::{sync::mpsc::Receiver, time::Duration};
 
 pub struct SawWaveOscilatorBandLimited {
     sample_rate: u32,
@@ -71,7 +70,8 @@ impl SawWaveOscilatorBandLimited {
         //adjust the volume
         result = result * 2.0 / std::f32::consts::PI;
 
-        self.amplitude = clamp(self.amplitude - 0.00001, 0.0, 1.0);
+        self.amplitude = clamp(self.amplitude - 0.00001, 0.0, 1.0); // decay
+
         return result * self.amplitude;
     }
 }
