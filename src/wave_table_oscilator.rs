@@ -1,6 +1,5 @@
 use ::num::clamp;
 use math::round;
-use num::complex::ComplexFloat;
 use rodio::Source;
 use std::{sync::mpsc::Receiver, time::Duration};
 pub struct WavetableOscillator {

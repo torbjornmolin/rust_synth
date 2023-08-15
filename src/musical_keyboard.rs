@@ -42,3 +42,10 @@ pub fn frequency_from_keycode(c: KeyCode, octave: f32) -> Option<f32> {
 pub fn calc_frequency(octave: f32, note: f32) -> f32 {
     return 440.0 * 2.0_f32.powf(((octave - 4.0) * 12.0 + note) / 12.0);
 }
+
+#[derive(Copy, Clone)]
+pub enum NoteEvent {
+    Press(f32),
+    Hold,
+    Up,
+}

@@ -2,22 +2,26 @@ use num::clamp;
 use rodio::Source;
 use std::{sync::mpsc::Receiver, time::Duration};
 
+use crate::musical_keyboard::NoteEvent;
+
 pub struct SawWaveOscilatorBandLimited {
     sample_rate: u32,
-    receiver: Receiver<f32>,
+    receiver: Receiver<NoteEvent>,
     amplitude: f32,
     current_frequency: f32,
     phase: f32,
+    current_event: Option<NoteEvent>,
 }
 
 impl SawWaveOscilatorBandLimited {
-    pub fn new(sample_rate: u32, receiver: Receiver<f32>) -> SawWaveOscilatorBandLimited {
+    pub fn new(sample_rate: u32, receiver: Receiver<NoteEvent>) -> SawWaveOscilatorBandLimited {
         return SawWaveOscilatorBandLimited {
             sample_rate,
             receiver,
             amplitude: 0.0,
             current_frequency: 0.0,
             phase: 0.0,
+            current_event: None,
         };
     }
 
@@ -31,7 +35,13 @@ impl SawWaveOscilatorBandLimited {
         match self.receiver.try_recv() {
             Ok(f) => {
                 self.amplitude = 1.0;
-                self.set_frequency(f);
+                match f {
+                    NoteEvent::Press(frequency) => self.set_frequency(frequency),
+                    NoteEvent::Hold => {}
+                    NoteEvent::Up => {}
+                }
+                self.current_event = Some(f);
+                //self.set_frequency(f);
             }
             Err(_) => (),
         }
@@ -95,9 +105,12 @@ impl Source for SawWaveOscilatorBandLimited {
 }
 
 impl Iterator for SawWaveOscilatorBandLimited {
-    type Item = f32;
+    type Item = crate::musicdata::MusicData;
 
     fn next(&mut self) -> Option<Self::Item> {
-        return Some(self.get_sample());
+        return Some(crate::musicdata::MusicData {
+            current_event: self.current_event,
+            wave_data: self.get_sample(),
+        });
     }
 }

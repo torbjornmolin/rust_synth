@@ -2,16 +2,15 @@ use std::sync::mpsc;
 
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use envvelope::Envelope;
-use math::round;
-use musical_keyboard::frequency_from_keycode;
-use rodio::{source::Source, OutputStream};
-use saw_wave_oscilator::SawWaveOscilator;
+use dataconverter::DataConverter;
+use musical_keyboard::{frequency_from_keycode, NoteEvent};
+use rodio::{OutputStream, Source};
 use saw_wave_oscilator_band_limited::SawWaveOscilatorBandLimited;
-use wave_table_oscilator::WavetableOscillator;
-
+pub mod MusicData;
+mod dataconverter;
 pub mod envvelope;
 mod musical_keyboard;
+mod musicdata;
 mod saw_wave_oscilator;
 mod saw_wave_oscilator_band_limited;
 mod wave_table_oscilator;
@@ -22,16 +21,17 @@ fn main() {
     //let oscillator = WavetableOscillator::new(44100, wave_table, rx);
     let oscillator = SawWaveOscilatorBandLimited::new(44100, rx);
 
-    let envelope = Envelope::new::<SawWaveOscilatorBandLimited>(oscillator);
+    // let envelope = Envelope::new::<SawWaveOscilatorBandLimited>(oscillator);
+    let data_converter = DataConverter::new::<SawWaveOscilatorBandLimited>(oscillator);
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let _result = stream_handle.play_raw(envelope.convert_samples());
+    let _result = stream_handle.play_raw(data_converter.convert_samples());
 
     listen_for_keyboard(tx);
 }
 
-fn listen_for_keyboard(mut tx: mpsc::Sender<f32>) {
+fn listen_for_keyboard(mut tx: mpsc::Sender<NoteEvent>) {
     enable_raw_mode().unwrap();
     let mut current_octave = 1.0;
     loop {
@@ -55,7 +55,7 @@ fn listen_for_keyboard(mut tx: mpsc::Sender<f32>) {
                 } else {
                     let f = frequency_from_keycode(c, current_octave);
                     match f {
-                        Some(f) => tx.send(f).unwrap(),
+                        Some(f) => tx.send(NoteEvent::Press(f)).unwrap(),
                         None => (),
                     }
                 }
