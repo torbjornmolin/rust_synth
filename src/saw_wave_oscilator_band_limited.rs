@@ -105,10 +105,10 @@ impl Source for SawWaveOscilatorBandLimited {
 }
 
 impl Iterator for SawWaveOscilatorBandLimited {
-    type Item = crate::musicdata::MusicData;
+    type Item = crate::music_data::MusicData;
 
     fn next(&mut self) -> Option<Self::Item> {
-        return Some(crate::musicdata::MusicData {
+        return Some(crate::music_data::MusicData {
             current_event: self.current_event,
             wave_data: self.get_sample(),
         });

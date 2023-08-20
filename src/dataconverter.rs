@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use rodio::Source;
 
-use crate::musicdata::MusicData;
+use crate::music_data::MusicData;
 pub struct DataConverter<I>
 where
     I: Iterator<Item = MusicData> + Source,
