@@ -32,6 +32,7 @@ impl SawWaveOscilatorBandLimited {
     }
 
     fn get_sample(&mut self) -> f32 {
+        self.current_event = None;
         match self.receiver.try_recv() {
             Ok(f) => {
                 self.amplitude = 1.0;

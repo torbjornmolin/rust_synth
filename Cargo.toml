@@ -8,5 +8,5 @@ edition = "2018"
 [dependencies]
 rodio = "0.14.0"
 libmath = "*"
-crossterm = "0.26.1"
+crossterm = "0.27.0"
 num = "0.4.0"
