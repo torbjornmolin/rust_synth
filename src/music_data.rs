@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::musical_keyboard::NoteEvent;
 use rodio::Sample;
 
@@ -32,18 +34,32 @@ unsafe impl rodio::cpal::Sample for MusicData {
 
 impl Sample for MusicData {
     fn lerp(first: Self, second: Self, numerator: u32, denominator: u32) -> Self {
-        todo!()
+        let wave_data = first.wave_data
+            + (second.wave_data - first.wave_data) * numerator as f32 / denominator as f32;
+        MusicData {
+            current_event: first.current_event,
+            wave_data,
+        }
     }
 
     fn amplify(self, value: f32) -> Self {
-        todo!()
+        MusicData {
+            current_event: self.current_event,
+            wave_data: self.wave_data * value,
+        }
     }
 
     fn saturating_add(self, other: Self) -> Self {
-        todo!()
+        MusicData {
+            current_event: self.current_event,
+            wave_data: self.wave_data + other.wave_data,
+        }
     }
 
     fn zero_value() -> Self {
-        todo!()
+        MusicData {
+            current_event: None,
+            wave_data: 0.0,
+        }
     }
 }
